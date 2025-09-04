@@ -24,7 +24,7 @@ const ListaCursos = () => {
           estudiante.matriculado ? "activo" : "inactivo"
         }`}
       >
-        {estudiante.matriculado ? "Matriculado ✅" : "No matriculado ❌"}
+        {estudiante.matriculado ? "Matriculado" : "No matriculado"}
       </p>
 
       {confirmada ? (
