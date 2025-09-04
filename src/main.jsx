@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom/client'
-import "./styles/global.scss";
+import "./styles/global.css";  
+import "./styles/listar_cursos.css";  
 import App from "./App.jsx";
 import React from "react";
 

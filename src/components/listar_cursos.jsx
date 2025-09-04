@@ -1,52 +1,73 @@
-import React, { useState } from "react";
+import React from "react";
 import cursos from "../data/cursos.json";
 import estudiante from "../data/estudiantes.json";
 import CursoCard from "./curso_card";
-import ResumenMatricula from "./matricula";
-import '../styles/listar_cursos.scss'
+import Matricula from "./matricula";
+import { useMatricula } from "../hooks/use_matricula";
 
 const ListaCursos = () => {
-  const [seleccionados, setSeleccionados] = useState([]);
-
-  // 👉 matricular curso
-  const handleMatricular = (curso) => {
-    if (seleccionados.some((c) => c.id === curso.id)) return;
-
-    const totalCreditos = seleccionados.reduce((acc, c) => acc + c.creditos, 0);
-    if (totalCreditos + curso.creditos > estudiante.creditosPermitidos) {
-      alert("Has superado el límite de créditos permitidos.");
-      return;
-    }
-
-    setSeleccionados([...seleccionados, curso]);
-  };
-
-  // 👉 quitar curso
-  const handleQuitar = (id) => {
-    const actualizados = seleccionados.filter((curso) => curso.id !== id);
-    setSeleccionados(actualizados);
-  };
+  const {
+    seleccionados,
+    confirmada,
+    handleMatricular,
+    handleQuitar,
+    handleConfirmar,
+    handleEliminar,
+  } = useMatricula(estudiante);
 
   return (
     <div className="lista-cursos">
       <h2>Cursos disponibles para {estudiante.nombre}</h2>
-      <ul>
-        {cursos.map((curso) => (
-          <CursoCard
-            key={curso.id}
-            curso={curso}
-            seleccionado={seleccionados.some((c) => c.id === curso.id)}
-            onMatricular={handleMatricular}
-          />
-        ))}
-      </ul>
 
-      {/* Resumen separado */}
-      <ResumenMatricula
-        seleccionados={seleccionados}
-        estudiante={estudiante}
-        onQuitar={handleQuitar}
-      />
+      <p
+        className={`estado-estudiante ${
+          estudiante.matriculado ? "activo" : "inactivo"
+        }`}
+      >
+        {estudiante.matriculado ? "Matriculado ✅" : "No matriculado ❌"}
+      </p>
+
+      {confirmada ? (
+        <div className="confirmacion-final">
+          <h3>Matrícula confirmada</h3>
+          <Matricula
+            seleccionados={seleccionados}
+            estudiante={estudiante}
+            onQuitar={null}
+          />
+          <button className="btn-eliminar" onClick={handleEliminar}>
+            Eliminar matrícula
+          </button>
+        </div>
+      ) : (
+        <>
+          <ul>
+            {cursos
+              .filter((curso) => curso.semestre === estudiante.semestre)
+              .map((curso) => (
+                <CursoCard
+                  key={curso.id}
+                  curso={curso}
+                  seleccionado={seleccionados.some((c) => c.id === curso.id)}
+                  onMatricular={handleMatricular}
+                  estudiante={estudiante}
+                />
+              ))}
+          </ul>
+
+          <Matricula
+            seleccionados={seleccionados}
+            estudiante={estudiante}
+            onQuitar={handleQuitar}
+          />
+
+          {seleccionados.length > 0 && (
+            <button className="btn-confirmar" onClick={handleConfirmar}>
+              Confirmar matrícula
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 };
